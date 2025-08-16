@@ -79,10 +79,11 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _signInWithGoogle() async {
     setState(() => _loading = true);
     try {
+      // Initialize GoogleSignIn
       final GoogleSignIn googleSignIn = GoogleSignIn(scopes: ['email']);
 
-      final GoogleSignInAccount? googleSignInAccount = await googleSignIn
-          .signIn();
+      // Attempt to sign in
+      final GoogleSignInAccount? googleSignInAccount = await googleSignIn.signIn();
 
       if (googleSignInAccount == null) {
         // User cancelled the sign-in
@@ -90,14 +91,17 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
+      // Retrieve authentication details
       final GoogleSignInAuthentication googleSignInAuthentication =
           await googleSignInAccount.authentication;
 
+      // Create credentials for Firebase authentication
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleSignInAuthentication.accessToken,
         idToken: googleSignInAuthentication.idToken,
       );
 
+      // Sign in to Firebase with the credentials
       await _auth.signInWithCredential(credential);
 
       if (!mounted) return;
@@ -105,7 +109,7 @@ class _LoginScreenState extends State<LoginScreen> {
         context,
       ).showSnackBar(const SnackBar(content: Text('Signed in with Google')));
 
-      // Navigate to dashboard after Google sign-in
+      // Navigate to dashboard after successful sign-in
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const DashboardScreen()),
