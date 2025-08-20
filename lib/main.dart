@@ -5,6 +5,7 @@ import 'firebase_options.dart';
 import 'onboarding.dart';
 import 'screen/dashboard.dart';
 import 'screen/auth/login_screen.dart';
+import 'services/global_notification_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,6 +21,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Eduro',
+      navigatorKey: GlobalNotificationService.navigatorKey,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,

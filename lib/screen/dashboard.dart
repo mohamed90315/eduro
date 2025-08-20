@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'Pomodoro.dart';
-
+import 'flashcard.dart';
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
@@ -165,7 +165,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       icon: Icons.style_outlined,
                       title: 'Flashcards',
                       subtitle: 'Practice with SRS',
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const FlashcardScreen(),
+                          ),
+                        );
+                      },
                     ),
                     _buildGridItem(
                       icon: Icons.quiz_outlined,
