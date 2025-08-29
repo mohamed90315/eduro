@@ -9,24 +9,60 @@ class PomodoroScreen extends StatefulWidget {
   State<PomodoroScreen> createState() => _PomodoroScreenState();
 }
 
-class _PomodoroScreenState extends State<PomodoroScreen> {
+class _PomodoroScreenState extends State<PomodoroScreen> with TickerProviderStateMixin {
   late PomodoroTimerService _timerService;
+  late AnimationController _progressController;
+  late Animation<double> _progressAnimation;
+  double _lastProgress = 0.0;
 
   @override
   void initState() {
     super.initState();
     _timerService = PomodoroTimerService();
     _timerService.addListener(_onTimerUpdate);
+    
+    // Initialize smooth progress animation
+    _progressController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    );
+    _progressAnimation = Tween<double>(begin: 0.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _progressController,
+        curve: Curves.easeInOut,
+      ),
+    );
   }
 
   @override
   void dispose() {
     _timerService.removeListener(_onTimerUpdate);
+    _progressController.dispose();
     super.dispose();
   }
 
   void _onTimerUpdate() {
     if (mounted) {
+      // Get current progress from timer service
+      double currentProgress = _timerService.currentProgress;
+      
+      // Only animate if progress has changed significantly
+      if ((currentProgress - _lastProgress).abs() > 0.001) {
+        // Update the animation to smoothly transition to new progress
+        _progressAnimation = Tween<double>(
+          begin: _lastProgress,
+          end: currentProgress,
+        ).animate(CurvedAnimation(
+          parent: _progressController,
+          curve: Curves.easeInOut,
+        ));
+        
+        // Reset and start the animation
+        _progressController.reset();
+        _progressController.forward();
+        _lastProgress = currentProgress;
+      }
+      
       setState(() {});
     }
   }
@@ -286,6 +322,12 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
                                 spreadRadius: 1,
                                 offset: const Offset(0, 8),
                               ),
+                              // Additional gradient shadow for the progress circle
+                              BoxShadow(
+                                color: Colors.cyanAccent.withOpacity(0.3),
+                                blurRadius: 6,
+                                offset: const Offset(0, 3),
+                              ),
                             ],
                           ),
                           child: Stack(
@@ -299,18 +341,28 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
                                   painter: BackgroundCirclePainter(strokeWidth: 12),
                                 ),
                               ),
-                              // Progress Circle
+                              // Progress Circle with smooth animation
                               SizedBox(
                                 width: 240,
                                 height: 240,
-                                child: CustomPaint(
-                                  painter: GradientCircularProgressPainter(
-                                    progress: _timerService.currentProgress,
-                                    strokeWidth: 12,
-                                    gradient: const LinearGradient(
-                                      colors: [Colors.blueAccent, Colors.greenAccent],
-                                    ),
-                                  ),
+                                child: AnimatedBuilder(
+                                  animation: _progressController,
+                                  builder: (context, child) {
+                                    // Use animated progress value for smooth transitions
+                                    double animatedProgress = _progressController.isAnimating 
+                                        ? _progressAnimation.value 
+                                        : _timerService.currentProgress;
+                                    
+                                    return CustomPaint(
+                                      painter: GradientCircularProgressPainter(
+                                        progress: animatedProgress,
+                                        strokeWidth: 12,
+                                        gradient: const LinearGradient(
+                                          colors: [Colors.blueAccent, Colors.greenAccent],
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 ),
                               ),
                               // Timer Content
@@ -320,9 +372,9 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
                                   Text(
                                     _timerService.currentDisplayMode ? 'Focus' : 'Break',
                                     style: const TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.black54,
-                                      fontWeight: FontWeight.w500,
+                                      fontSize: 18,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   const SizedBox(height: 8),
@@ -467,13 +519,33 @@ class GradientCircularProgressPainter extends CustomPainter {
     double radius = (size.width / 2) - strokeWidth / 2;
     Offset center = Offset(size.width / 2, size.height / 2);
     
+    double sweepAngle = 2 * math.pi * progress;
+    
+    // Draw shadow for the progress arc
+    if (progress > 0) {
+      Paint shadowPaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth + 4
+        ..strokeCap = StrokeCap.round
+        ..color = Colors.black.withOpacity(0.1)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
+
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        -math.pi / 2,
+        sweepAngle,
+        false,
+        shadowPaint,
+      );
+    }
+    
+    // Draw the main gradient progress arc
     Paint paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round
       ..shader = gradient.createShader(Rect.fromCircle(center: center, radius: radius));
 
-    double sweepAngle = 2 * math.pi * progress;
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius),
       -math.pi / 2,

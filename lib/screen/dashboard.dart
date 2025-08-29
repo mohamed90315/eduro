@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'Pomodoro.dart';
 import 'flashcard.dart';
+import 'goals.dart';
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
@@ -9,7 +10,71 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  int _currentIndex = 0;
+  int _selectedIndex = 0; // Home tab is selected (index 0)
+
+  void _onNavTapped(int index) {
+    // Don't navigate if already on the same tab
+    if (index == _selectedIndex) return;
+    
+    setState(() {
+      _selectedIndex = index;
+    });
+    
+    // Handle navigation based on index
+    switch (index) {
+      case 0: // Home
+        // Already on dashboard screen
+        break;
+      case 1: // Course
+        // Navigate to course screen (placeholder for now)
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Course feature coming soon!'),
+            backgroundColor: Colors.blue,
+            duration: Duration(seconds: 2),
+          ),
+        );
+        // Reset to current tab since we're not navigating
+        setState(() {
+          _selectedIndex = 0;
+        });
+        break;
+      case 2: // Cards
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const FlashcardScreen()),
+        );
+        break;
+      case 3: // Quiz
+        // Navigate to quiz screen (placeholder for now)
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Quiz feature coming soon!'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+        // Reset to current tab since we're not navigating
+        setState(() {
+          _selectedIndex = 0;
+        });
+        break;
+      case 4: // Profile
+        // Navigate to profile screen (placeholder for now)
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Profile feature coming soon!'),
+            backgroundColor: Colors.purple,
+            duration: Duration(seconds: 2),
+          ),
+        );
+        // Reset to current tab since we're not navigating
+        setState(() {
+          _selectedIndex = 0;
+        });
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -264,7 +329,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     child: _buildBottomGridItem(
                       icon: Icons.flag_outlined,
                       title: 'Goals',
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const GoalsScreen(),
+                          ),
+                        );
+                      },
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -335,39 +407,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xFF2196F3),
-        unselectedItemColor: Colors.grey[600],
+      bottomNavigationBar: NavigationBar(
         backgroundColor: Colors.white,
-        elevation: 8,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.book_outlined),
-            label: 'Course',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.style_outlined),
-            label: 'Cards',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.help_outline),
-            label: 'Quiz',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'Profile',
-          ),
+        indicatorColor: Colors.cyan.withOpacity(0.2),
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: _onNavTapped,
+        destinations: const [
+          NavigationDestination(icon: Icon(Icons.home, color: Colors.black), label: 'Home'),
+          NavigationDestination(icon: Icon(Icons.menu_book, color: Colors.black), label: 'Course'),
+          NavigationDestination(icon: Icon(Icons.layers, color: Colors.black), label: 'Cards'),
+          NavigationDestination(icon: Icon(Icons.quiz, color: Colors.black), label: 'Quiz'),
+          NavigationDestination(icon: Icon(Icons.person, color: Colors.black), label: 'Profile'),
         ],
       ),
     );

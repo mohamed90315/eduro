@@ -2,7 +2,6 @@ import 'dart:math' as math;
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dashboard.dart';
 
 class Flashcard {
   final String question;
@@ -55,32 +54,55 @@ class FlashcardService {
   bool _isShuffled = false;
   List<Flashcard> _shuffledCards = [];
   bool _hasCompletedRound = false;
+  
+  // Wrong answers tracking
+  List<Flashcard> _wrongAnswers = [];
+  bool _isReviewingWrongAnswers = false;
+  int _wrongAnswerIndex = 0;
 
   // Getters
-  List<Flashcard> get flashcards => _isShuffled ? _shuffledCards : _flashcards;
-  Flashcard get currentCard => flashcards[_currentIndex];
-  int get currentIndex => _currentIndex;
-  int get totalCards => flashcards.length;
+  List<Flashcard> get flashcards => _isReviewingWrongAnswers 
+    ? _wrongAnswers 
+    : (_isShuffled ? _shuffledCards : _flashcards);
+  Flashcard get currentCard => _isReviewingWrongAnswers 
+    ? _wrongAnswers[_wrongAnswerIndex] 
+    : flashcards[_currentIndex];
+  int get currentIndex => _isReviewingWrongAnswers ? _wrongAnswerIndex : _currentIndex;
+  int get totalCards => _isReviewingWrongAnswers ? _wrongAnswers.length : flashcards.length;
   int get correctAnswers => _correctAnswers;
   int get totalAnswered => _totalAnswered;
   double get accuracy => _totalAnswered > 0 ? _correctAnswers / _totalAnswered : 0.0;
   bool get isShuffled => _isShuffled;
+  bool get isReviewingWrongAnswers => _isReviewingWrongAnswers;
+  int get wrongAnswersCount => _wrongAnswers.length;
 
   void nextCard() {
-    _currentIndex = (_currentIndex + 1) % flashcards.length;
-    // Additional safety check
-    if (_currentIndex >= flashcards.length) {
-      _currentIndex = 0;
+    if (_isReviewingWrongAnswers) {
+      _wrongAnswerIndex = (_wrongAnswerIndex + 1) % _wrongAnswers.length;
+      if (_wrongAnswerIndex >= _wrongAnswers.length) {
+        _wrongAnswerIndex = 0;
+      }
+    } else {
+      _currentIndex = (_currentIndex + 1) % flashcards.length;
+      if (_currentIndex >= flashcards.length) {
+        _currentIndex = 0;
+      }
     }
   }
 
   bool get hasCompletedRound => _hasCompletedRound;
 
   void previousCard() {
-    _currentIndex = (_currentIndex - 1 + flashcards.length) % flashcards.length;
-    // Additional safety check
-    if (_currentIndex < 0) {
-      _currentIndex = flashcards.length - 1;
+    if (_isReviewingWrongAnswers) {
+      _wrongAnswerIndex = (_wrongAnswerIndex - 1 + _wrongAnswers.length) % _wrongAnswers.length;
+      if (_wrongAnswerIndex < 0) {
+        _wrongAnswerIndex = _wrongAnswers.length - 1;
+      }
+    } else {
+      _currentIndex = (_currentIndex - 1 + flashcards.length) % flashcards.length;
+      if (_currentIndex < 0) {
+        _currentIndex = flashcards.length - 1;
+      }
     }
   }
 
@@ -92,6 +114,12 @@ class FlashcardService {
 
   void markIncorrect() {
     _totalAnswered++;
+    
+    // Add current card to wrong answers list if not already reviewing wrong answers
+    if (!_isReviewingWrongAnswers && !_wrongAnswers.contains(currentCard)) {
+      _wrongAnswers.add(currentCard);
+    }
+    
     checkForCompletion();
   }
 
@@ -123,6 +151,27 @@ class FlashcardService {
     _hasCompletedRound = false;
     _isShuffled = false;
     _shuffledCards.clear();
+    _wrongAnswers.clear();
+    _isReviewingWrongAnswers = false;
+    _wrongAnswerIndex = 0;
+  }
+
+  void startWrongAnswerReview() {
+    if (_wrongAnswers.isNotEmpty) {
+      _isReviewingWrongAnswers = true;
+      _wrongAnswerIndex = 0;
+    }
+  }
+
+  void exitWrongAnswerReview() {
+    _isReviewingWrongAnswers = false;
+    _wrongAnswerIndex = 0;
+  }
+
+  void clearWrongAnswers() {
+    _wrongAnswers.clear();
+    _isReviewingWrongAnswers = false;
+    _wrongAnswerIndex = 0;
   }
 
   void validateState() {
@@ -162,7 +211,13 @@ class FlashcardService {
 
   // Method to check if we should mark completion
   void checkForCompletion() {
-    if (_totalAnswered >= flashcards.length && !_hasCompletedRound) {
+    if (_isReviewingWrongAnswers) {
+      // During wrong answer review, completion happens when all wrong answers are reviewed
+      // This is handled by the UI, not automatically
+      return;
+    }
+    
+    if (_totalAnswered >= (_isShuffled ? _shuffledCards.length : _flashcards.length) && !_hasCompletedRound) {
       _hasCompletedRound = true;
       print('Marking round as completed');
     }
@@ -293,67 +348,11 @@ class _FlashcardScreenState extends State<FlashcardScreen> with TickerProviderSt
   }
 
   void _onNavTapped(int index) {
-    // Don't navigate if already on the same tab
-    if (index == _selectedIndex) return;
-    
     setState(() {
       _selectedIndex = index;
     });
-    
     // Handle navigation based on index
-    switch (index) {
-      case 0: // Home
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const DashboardScreen()),
-        );
-        break;
-      case 1: // Course
-        // Navigate to course screen (placeholder for now)
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Course feature coming soon!'),
-            backgroundColor: Colors.blue,
-            duration: Duration(seconds: 2),
-          ),
-        );
-        // Reset to current tab since we're not navigating
-        setState(() {
-          _selectedIndex = 2;
-        });
-        break;
-      case 2: // Cards (current screen)
-        // Already on flashcard screen
-        break;
-      case 3: // Quiz
-        // Navigate to quiz screen (placeholder for now)
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Quiz feature coming soon!'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
-          ),
-        );
-        // Reset to current tab since we're not navigating
-        setState(() {
-          _selectedIndex = 2;
-        });
-        break;
-      case 4: // Profile
-        // Navigate to profile screen (placeholder for now)
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Profile feature coming soon!'),
-            backgroundColor: Colors.purple,
-            duration: Duration(seconds: 2),
-          ),
-        );
-        // Reset to current tab since we're not navigating
-        setState(() {
-          _selectedIndex = 2;
-        });
-        break;
-    }
+    // You can add navigation logic here if needed
   }
 
   void _showCompletionDialog() {
@@ -442,6 +441,28 @@ class _FlashcardScreenState extends State<FlashcardScreen> with TickerProviderSt
                   
                   const SizedBox(height: 24),
                   
+                  // Show wrong answers info if any
+                  if (_flashcardService.wrongAnswersCount > 0) ...[
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                      ),
+                      child: Text(
+                        'You got ${_flashcardService.wrongAnswersCount} question${_flashcardService.wrongAnswersCount == 1 ? '' : 's'} wrong. Review them?',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.orange,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                  
                   // Buttons
                   Row(
                     children: [
@@ -462,7 +483,54 @@ class _FlashcardScreenState extends State<FlashcardScreen> with TickerProviderSt
                         ),
                       ),
                       
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 8),
+                      
+                      // Review Wrong Answers button (only show if there are wrong answers)
+                      if (_flashcardService.wrongAnswersCount > 0) ...[
+                        Expanded(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Colors.orange, Colors.orangeAccent],
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.orange.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  spreadRadius: 1,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                _flashcardService.startWrongAnswerReview();
+                                setState(() {});
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                elevation: 0,
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: const Text(
+                                'Review',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
                       
                       Expanded(
                         child: Container(
@@ -527,35 +595,64 @@ class _FlashcardScreenState extends State<FlashcardScreen> with TickerProviderSt
         automaticallyImplyLeading: false, // Remove back button
         title: Row(
           children: [
-            const Text(
-              'Flashcards',
-              style: TextStyle(
+            Text(
+              _flashcardService.isReviewingWrongAnswers ? 'Review Wrong Answers' : 'Flashcards',
+              style: const TextStyle(
                 color: Colors.black,
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(width: 8),
-            const Text(
-              '🧠',
-              style: TextStyle(fontSize: 20),
+            Text(
+              _flashcardService.isReviewingWrongAnswers ? '🔄' : '🧠',
+              style: const TextStyle(fontSize: 20),
             ),
             const Spacer(),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.black12,
+                color: _flashcardService.isReviewingWrongAnswers 
+                  ? Colors.orange.withOpacity(0.2) 
+                  : Colors.black12,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
                 '${_flashcardService.currentIndex + 1}/${_flashcardService.totalCards}',
-                style: const TextStyle(
-                  color: Colors.black87,
+                style: TextStyle(
+                  color: _flashcardService.isReviewingWrongAnswers 
+                    ? Colors.orange.shade800 
+                    : Colors.black87,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ),
+            if (_flashcardService.isReviewingWrongAnswers) ...[
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () {
+                  _flashcardService.exitWrongAnswerReview();
+                  setState(() {});
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.red.withOpacity(0.3)),
+                  ),
+                  child: const Text(
+                    'Exit Review',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
