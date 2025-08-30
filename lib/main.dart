@@ -46,14 +46,19 @@ class _AuthGateState extends State<AuthGate> {
 
   @override
   Widget build(BuildContext context) {
-    if (_currentUser != null) {
-      return const DashboardScreen();
-    }
-
+    // Always listen to auth state changes so sign-out and sign-in events
+    // update the UI. Use the cached `_currentUser` as a fast initial
+    // fallback while the stream establishes its first value.
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
+          // If we have a persisted user from initState, show dashboard
+          // immediately while waiting for the stream. Otherwise show a
+          // loading indicator.
+          if (_currentUser != null) {
+            return const DashboardScreen();
+          }
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );

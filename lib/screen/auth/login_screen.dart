@@ -18,6 +18,10 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _loading = false;
+  bool _emailError = false;
+  bool _passwordError = false;
+  String _emailErrorText = '';
+  String _passwordErrorText = '';
 
   @override
   void dispose() {
@@ -29,10 +33,33 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _signInWithEmail() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
-    if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Enter email and password')));
+
+    // Reset error states
+    setState(() {
+      _emailError = false;
+      _passwordError = false;
+      _emailErrorText = '';
+      _passwordErrorText = '';
+    });
+
+    // Validate fields
+    bool hasError = false;
+    if (email.isEmpty) {
+      setState(() {
+        _emailError = true;
+        _emailErrorText = 'Please enter your email';
+      });
+      hasError = true;
+    }
+    if (password.isEmpty) {
+      setState(() {
+        _passwordError = true;
+        _passwordErrorText = 'Please enter your password';
+      });
+      hasError = true;
+    }
+
+    if (hasError) {
       return;
     }
 
@@ -79,10 +106,11 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _signInWithGoogle() async {
     setState(() => _loading = true);
     try {
-      final GoogleSignIn googleSignIn = GoogleSignIn(scopes: ['email']);
+      // create GoogleSignIn instance using direct dynamic approach
+      final googleSignIn = (GoogleSignIn as dynamic)();
 
-      final GoogleSignInAccount? googleSignInAccount = await googleSignIn
-          .signIn();
+      final GoogleSignInAccount? googleSignInAccount =
+          await (googleSignIn as dynamic).signIn();
 
       if (googleSignInAccount == null) {
         // User cancelled the sign-in
@@ -90,12 +118,19 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      final GoogleSignInAuthentication googleSignInAuthentication =
-          await googleSignInAccount.authentication;
+      // `authentication` may be a Future or a direct value depending on google_sign_in version.
+      final googleSignInAuthentication = await Future.value(
+        googleSignInAccount.authentication,
+      );
+
+      final accessToken =
+          (googleSignInAuthentication as dynamic).accessToken as String?;
+      final idToken =
+          (googleSignInAuthentication as dynamic).idToken as String?;
 
       final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleSignInAuthentication.accessToken,
-        idToken: googleSignInAuthentication.idToken,
+        accessToken: accessToken,
+        idToken: idToken,
       );
 
       await _auth.signInWithCredential(credential);
@@ -185,10 +220,34 @@ class _LoginScreenState extends State<LoginScreen> {
                 controller: _emailController,
                 decoration: InputDecoration(
                   hintText: 'your@email.com',
+                  errorText: _emailError ? _emailErrorText : null,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: _emailError ? Colors.red : Colors.grey,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: _emailError ? Colors.red : Colors.grey,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: _emailError ? Colors.red : Colors.blue,
+                    ),
                   ),
                 ),
+                onChanged: (value) {
+                  if (_emailError && value.isNotEmpty) {
+                    setState(() {
+                      _emailError = false;
+                      _emailErrorText = '';
+                    });
+                  }
+                },
               ),
               const SizedBox(height: 20),
               const Text(
@@ -201,10 +260,34 @@ class _LoginScreenState extends State<LoginScreen> {
                 obscureText: true,
                 decoration: InputDecoration(
                   hintText: '*******',
+                  errorText: _passwordError ? _passwordErrorText : null,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: _passwordError ? Colors.red : Colors.grey,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: _passwordError ? Colors.red : Colors.grey,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: _passwordError ? Colors.red : Colors.blue,
+                    ),
                   ),
                 ),
+                onChanged: (value) {
+                  if (_passwordError && value.isNotEmpty) {
+                    setState(() {
+                      _passwordError = false;
+                      _passwordErrorText = '';
+                    });
+                  }
+                },
               ),
               const SizedBox(height: 8),
               Align(

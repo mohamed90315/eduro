@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'login_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -16,6 +17,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _confirmController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _loading = false;
+  bool _nameError = false;
+  bool _emailError = false;
+  bool _passwordError = false;
+  bool _confirmError = false;
+  String _nameErrorText = '';
+  String _emailErrorText = '';
+  String _passwordErrorText = '';
+  String _confirmErrorText = '';
 
   @override
   void dispose() {
@@ -27,30 +36,90 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future<void> _signUp() async {
+    final name = _nameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
-    if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Enter email and password')));
+    final confirm = _confirmController.text.trim();
+
+    setState(() {
+      _nameError = name.isEmpty;
+      _emailError = email.isEmpty;
+      _passwordError = password.isEmpty;
+      _confirmError = confirm.isEmpty;
+      _nameErrorText = name.isEmpty ? 'Please enter your full name' : '';
+      _emailErrorText = email.isEmpty ? 'Please enter your email' : '';
+      _passwordErrorText = password.isEmpty ? 'Please enter your password' : '';
+      _confirmErrorText = confirm.isEmpty ? 'Please confirm your password' : '';
+    });
+
+    if (_nameError || _emailError || _passwordError || _confirmError) {
       return;
     }
-    if (_passwordController.text != _confirmController.text) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Passwords do not match')));
+
+    // client-side check to avoid Firebase weak-password error
+    if (password.length < 6) {
+      setState(() {
+        _passwordError = true;
+        _passwordErrorText = 'Password must be at least 6 characters';
+      });
+      return;
+    }
+
+    if (password != confirm) {
+      setState(() {
+        _passwordError = true;
+        _confirmError = true;
+        _passwordErrorText = 'Passwords do not match';
+        _confirmErrorText = 'Passwords do not match';
+      });
       return;
     }
     setState(() => _loading = true);
     try {
-      await _auth.createUserWithEmailAndPassword(
+      final cred = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+      final user = cred.user;
+      // create a user document in Firestore so we can store metadata and photo URL
+      if (user != null) {
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'displayName': _nameController.text.trim(),
+          'email': user.email,
+          'photoUrl': '',
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+        // Optionally update the FirebaseAuth displayName
+        try {
+          await user.updateDisplayName(_nameController.text.trim());
+        } catch (_) {}
+      }
+      // verify Firestore write
+      bool firestoreOk = false;
+      try {
+        if (user != null) {
+          final doc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .get();
+          firestoreOk = doc.exists;
+        }
+      } catch (_) {
+        firestoreOk = false;
+      }
+
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Account created')));
+      if (firestoreOk) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Account created')));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Account created — Firestore write failed'),
+          ),
+        );
+      }
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -98,10 +167,34 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 controller: _nameController,
                 decoration: InputDecoration(
                   hintText: 'Enter your full name',
+                  errorText: _nameError ? _nameErrorText : null,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: _nameError ? Colors.red : Colors.grey,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: _nameError ? Colors.red : Colors.grey,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: _nameError ? Colors.red : Colors.blue,
+                    ),
                   ),
                 ),
+                onChanged: (value) {
+                  if (_nameError && value.isNotEmpty) {
+                    setState(() {
+                      _nameError = false;
+                      _nameErrorText = '';
+                    });
+                  }
+                },
               ),
               const SizedBox(height: 20),
               const Text(
@@ -113,10 +206,34 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 controller: _emailController,
                 decoration: InputDecoration(
                   hintText: 'your@email.com',
+                  errorText: _emailError ? _emailErrorText : null,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: _emailError ? Colors.red : Colors.grey,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: _emailError ? Colors.red : Colors.grey,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: _emailError ? Colors.red : Colors.blue,
+                    ),
                   ),
                 ),
+                onChanged: (value) {
+                  if (_emailError && value.isNotEmpty) {
+                    setState(() {
+                      _emailError = false;
+                      _emailErrorText = '';
+                    });
+                  }
+                },
               ),
               const SizedBox(height: 20),
               const Text(
@@ -129,10 +246,34 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 obscureText: true,
                 decoration: InputDecoration(
                   hintText: '........',
+                  errorText: _passwordError ? _passwordErrorText : null,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: _passwordError ? Colors.red : Colors.grey,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: _passwordError ? Colors.red : Colors.grey,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: _passwordError ? Colors.red : Colors.blue,
+                    ),
                   ),
                 ),
+                onChanged: (value) {
+                  if (_passwordError && value.isNotEmpty) {
+                    setState(() {
+                      _passwordError = false;
+                      _passwordErrorText = '';
+                    });
+                  }
+                },
               ),
               const SizedBox(height: 20),
               const Text(
@@ -145,10 +286,34 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 obscureText: true,
                 decoration: InputDecoration(
                   hintText: '........',
+                  errorText: _confirmError ? _confirmErrorText : null,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: _confirmError ? Colors.red : Colors.grey,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: _confirmError ? Colors.red : Colors.grey,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: _confirmError ? Colors.red : Colors.blue,
+                    ),
                   ),
                 ),
+                onChanged: (value) {
+                  if (_confirmError && value.isNotEmpty) {
+                    setState(() {
+                      _confirmError = false;
+                      _confirmErrorText = '';
+                    });
+                  }
+                },
               ),
               const SizedBox(height: 30),
               SizedBox(
