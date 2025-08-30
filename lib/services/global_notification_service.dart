@@ -277,7 +277,7 @@ class GlobalNotificationService {
                   ),
                   const SizedBox(height: 20),
                   const Text(
-                    '🎉 Goal Completed! 🎉',
+                    'Goal Completed! 🎉',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,

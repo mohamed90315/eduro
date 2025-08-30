@@ -946,19 +946,13 @@ class _GoalsScreenState extends State<GoalsScreen> with SingleTickerProviderStat
                       'Enable Break Reminders',
                       style: TextStyle(color: Colors.black87),
                     ),
-                    Transform.scale(
-                      scale: 1.2,
-                      child: Switch(
-                        value: _goalsService.breakReminders,
-                        onChanged: (value) {
-                          _goalsService.setBreakReminders(value);
-                          setState(() {});
-                        },
-                        activeColor: const Color(0xFF00838F),
-                        inactiveThumbColor: Colors.grey.shade600,
-                        inactiveTrackColor: Colors.grey.shade200,
-                        trackOutlineColor: MaterialStateProperty.all(Colors.transparent),
-                      ),
+                    Switch(
+                      value: _goalsService.breakReminders,
+                      onChanged: (value) {
+                        _goalsService.setBreakReminders(value);
+                        setState(() {});
+                      },
+                      activeColor: const Color(0xFF00838F),
                     ),
                   ],
                 ),
@@ -1052,6 +1046,19 @@ class _GoalsScreenState extends State<GoalsScreen> with SingleTickerProviderStat
                 colors: [Color(0xFF2A7DE1), Color(0xFF2BD46E)],
               ),
               borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.cyanAccent.withOpacity(0.3),
+                  blurRadius: 6,
+                  offset: const Offset(0, 3),
+                ),
+                BoxShadow(
+                  color: const Color(0xFF2A7DE1).withOpacity(0.2),
+                  blurRadius: 12,
+                  spreadRadius: 2,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: ElevatedButton(
               onPressed: () {
@@ -1265,6 +1272,19 @@ class _GoalsScreenState extends State<GoalsScreen> with SingleTickerProviderStat
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(14),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.cyanAccent.withOpacity(0.3),
+                  blurRadius: 6,
+                  offset: const Offset(0, 3),
+                ),
+                BoxShadow(
+                  color: const Color(0xFF2A7DE1).withOpacity(0.1),
+                  blurRadius: 12,
+                  spreadRadius: 2,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Container(
               margin: const EdgeInsets.all(2),
@@ -1286,6 +1306,13 @@ class _GoalsScreenState extends State<GoalsScreen> with SingleTickerProviderStat
                         colors: [Color(0xFF2A7DE1), Color(0xFF2BD46E)],
                       ),
                       shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.cyanAccent.withOpacity(0.3),
+                          blurRadius: 6,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
                     ),
                     child: const Icon(
                       Icons.psychology,
@@ -1511,6 +1538,19 @@ class _GoalsScreenState extends State<GoalsScreen> with SingleTickerProviderStat
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.cyanAccent.withOpacity(0.3),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
+          BoxShadow(
+            color: const Color(0xFF2A7DE1).withOpacity(0.1),
+            blurRadius: 12,
+            spreadRadius: 2,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Container(
         margin: const EdgeInsets.all(2),
@@ -1535,6 +1575,13 @@ class _GoalsScreenState extends State<GoalsScreen> with SingleTickerProviderStat
                       colors: [Color(0xFF2A7DE1), Color(0xFF2BD46E)],
                     ),
                     borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.cyanAccent.withOpacity(0.3),
+                        blurRadius: 6,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
                   ),
                   child: Icon(icon, color: Colors.white, size: 20),
                 ),
@@ -1659,6 +1706,19 @@ class _GoalsScreenState extends State<GoalsScreen> with SingleTickerProviderStat
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.cyanAccent.withOpacity(0.3),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
+          BoxShadow(
+            color: const Color(0xFF2A7DE1).withOpacity(0.1),
+            blurRadius: 12,
+            spreadRadius: 2,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Container(
         margin: const EdgeInsets.all(2),
@@ -1708,9 +1768,15 @@ class _GoalsScreenState extends State<GoalsScreen> with SingleTickerProviderStat
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.cyanAccent.withOpacity(0.18),
+            color: Colors.cyanAccent.withOpacity(0.3),
             blurRadius: 6,
-            offset: const Offset(0, 2),
+            offset: const Offset(0, 3),
+          ),
+          BoxShadow(
+            color: const Color(0xFF2A7DE1).withOpacity(0.1),
+            blurRadius: 12,
+            spreadRadius: 2,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -1737,6 +1803,13 @@ class _GoalsScreenState extends State<GoalsScreen> with SingleTickerProviderStat
                       colors: [Color(0xFF2A7DE1), Color(0xFF2BD46E)],
                     ),
                     borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.cyanAccent.withOpacity(0.3),
+                        blurRadius: 6,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
                   ),
                   child: Icon(icon, color: Colors.white, size: 20),
                 ),

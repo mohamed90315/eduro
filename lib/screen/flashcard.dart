@@ -643,19 +643,7 @@ class _FlashcardScreenState extends State<FlashcardScreen> with TickerProviderSt
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.cyanAccent.withOpacity(0.3),
-            blurRadius: 6,
-            offset: const Offset(0, 3),
-          ),
-          BoxShadow(
-            color: Colors.cyanAccent.withOpacity(0.6),
-            blurRadius: 8,
-            spreadRadius: 1,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.cyanAccent.withOpacity(0.2), blurRadius: 7, offset: const Offset(0, 3))],
       ),
       child: Column(
         children: [
@@ -753,25 +741,7 @@ class _FlashcardScreenState extends State<FlashcardScreen> with TickerProviderSt
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.cyanAccent.withOpacity(0.3),
-                      blurRadius: 6,
-                      offset: const Offset(0, 3),
-                    ),
-                    BoxShadow(
-                      color: Colors.cyanAccent.withOpacity(0.6),
-                      blurRadius: 12,
-                      spreadRadius: 2,
-                      offset: const Offset(0, 4),
-                    ),
-                    BoxShadow(
-                      color: Colors.blue.withOpacity(0.1),
-                      blurRadius: 20,
-                      spreadRadius: 5,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
+                  boxShadow: [BoxShadow(color: Colors.cyanAccent.withOpacity(0.3), blurRadius: 7, offset: const Offset(0, 3))],
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(24.0),
