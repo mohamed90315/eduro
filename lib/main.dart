@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 import 'onboarding.dart';
 import 'screen/dashboard.dart';
-import 'screen/auth/login_screen.dart';
 import 'services/global_notification_service.dart';
 
 Future<void> main() async {
@@ -26,7 +25,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const LoginScreen(),
+      home: const OnboardingScreen(),
     );
   }
 }
