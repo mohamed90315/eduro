@@ -1,8 +1,12 @@
+import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dashboard.dart';
+import 'package:http/http.dart' as http;
+
+final String api = "https://mock-api.net/api/Flutter1/Flashcards_Questions"; // Ensure the API URL is valid and accessible.
 
 class Flashcard {
   final String question;
@@ -14,6 +18,21 @@ class Flashcard {
     required this.answer,
     required this.category,
   });
+  static Future<List<Flashcard>> fetchFlashcardsQA() async {
+    final response = await http.get(Uri.parse(api));
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonList = jsonDecode(response.body) as List<dynamic>;
+      return jsonList.map((json) {
+        return Flashcard(
+          question: json['question'] as String,
+          answer: json['answer'] as String,
+          category: json['category'] as String,
+        );
+      }).toList();
+    } else {
+      throw Exception('Failed to load flashcards');
+    }
+  }
 }
 
 class FlashcardService {
@@ -21,33 +40,7 @@ class FlashcardService {
   factory FlashcardService() => _instance;
   FlashcardService._internal();
 
-  List<Flashcard> _flashcards = [
-    Flashcard(
-      question: "What is Flutter?",
-      answer: "Flutter is Google's open-source UI software development kit used to develop applications for Android, iOS, Linux, Mac, Windows, and the web from a single codebase.",
-      category: "Technology",
-    ),
-    Flashcard(
-      question: "What is the capital of Japan?",
-      answer: "Tokyo is the capital and most populous city of Japan. It serves as the country's political, economic, and cultural center.",
-      category: "Geography",
-    ),
-    Flashcard(
-      question: "What is photosynthesis?",
-      answer: "Photosynthesis is the process by which green plants and some other organisms use sunlight to synthesize foods from carbon dioxide and water, typically producing oxygen as a byproduct.",
-      category: "Science",
-    ),
-    Flashcard(
-      question: "Who wrote Romeo and Juliet?",
-      answer: "William Shakespeare wrote Romeo and Juliet around 1594-1596. It is one of his most famous tragedies and tells the story of two young star-crossed lovers.",
-      category: "Literature",
-    ),
-    Flashcard(
-      question: "What is the Pythagorean theorem?",
-      answer: "The Pythagorean theorem states that in a right triangle, the square of the hypotenuse (the side opposite the right angle) is equal to the sum of the squares of the other two sides: a² + b² = c²",
-      category: "Mathematics",
-    ),
-  ];
+  List<Flashcard> _flashcards = []; // Initialize as an empty list
 
   int _currentIndex = 0;
   int _correctAnswers = 0;
@@ -58,7 +51,7 @@ class FlashcardService {
 
   // Getters
   List<Flashcard> get flashcards => _isShuffled ? _shuffledCards : _flashcards;
-  Flashcard get currentCard => flashcards[_currentIndex];
+  Flashcard? get currentCard => flashcards.isNotEmpty ? flashcards[_currentIndex] : null;
   int get currentIndex => _currentIndex;
   int get totalCards => flashcards.length;
   int get correctAnswers => _correctAnswers;
@@ -66,7 +59,13 @@ class FlashcardService {
   double get accuracy => _totalAnswered > 0 ? _correctAnswers / _totalAnswered : 0.0;
   bool get isShuffled => _isShuffled;
 
+  // Method to load flashcards asynchronously
+  Future<void> loadFlashcards() async {
+    _flashcards = await Flashcard.fetchFlashcardsQA();
+  }
+
   void nextCard() {
+    if (flashcards.isEmpty) return;
     _currentIndex = (_currentIndex + 1) % flashcards.length;
     // Additional safety check
     if (_currentIndex >= flashcards.length) {
@@ -77,6 +76,7 @@ class FlashcardService {
   bool get hasCompletedRound => _hasCompletedRound;
 
   void previousCard() {
+    if (flashcards.isEmpty) return;
     _currentIndex = (_currentIndex - 1 + flashcards.length) % flashcards.length;
     // Additional safety check
     if (_currentIndex < 0) {
@@ -127,6 +127,16 @@ class FlashcardService {
 
   void validateState() {
     print('Validating state: currentIndex=$_currentIndex, totalAnswered=$_totalAnswered, totalCards=${flashcards.length}, hasCompletedRound=$_hasCompletedRound');
+    
+    // If no flashcards loaded, reset everything
+    if (flashcards.isEmpty) {
+      print('No flashcards loaded, resetting state');
+      _currentIndex = 0;
+      _correctAnswers = 0;
+      _totalAnswered = 0;
+      _hasCompletedRound = false;
+      return;
+    }
     
     // If user completed all cards and comes back, reset everything
     if (_totalAnswered >= flashcards.length && _hasCompletedRound) {
@@ -206,13 +216,36 @@ class _FlashcardScreenState extends State<FlashcardScreen> with TickerProviderSt
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _slideController, curve: Curves.easeOut));
     
-    // Validate and fix any corrupted state when returning to the screen
-    _flashcardService.validateState();
-    
-    // Debug: Print current state
-    print('FlashCard State at initState: ${_flashcardService.currentIndex + 1}/${_flashcardService.totalCards} (totalAnswered=${_flashcardService.totalAnswered}, hasCompletedRound=${_flashcardService.hasCompletedRound})');
+    // Load flashcards first
+    _loadFlashcards();
     
     _slideController.forward();
+  }
+  
+  Future<void> _loadFlashcards() async {
+    try {
+      await _flashcardService.loadFlashcards();
+      // Validate and fix any corrupted state after loading
+      _flashcardService.validateState();
+      
+      // Debug: Print current state
+      print('FlashCard State after loading: ${_flashcardService.currentIndex + 1}/${_flashcardService.totalCards} (totalAnswered=${_flashcardService.totalAnswered}, hasCompletedRound=${_flashcardService.hasCompletedRound})');
+      
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e) {
+      print('Error loading flashcards: $e');
+      // Handle error appropriately
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load flashcards: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -519,6 +552,42 @@ class _FlashcardScreenState extends State<FlashcardScreen> with TickerProviderSt
 
   @override
   Widget build(BuildContext context) {
+    // Show loading screen if flashcards are not loaded yet
+    if (_flashcardService.totalCards == 0) {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          automaticallyImplyLeading: false,
+          title: const Text(
+            'Loading Flashcards...',
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        body: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text(
+                'Loading flashcards...',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black54,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -657,7 +726,9 @@ class _FlashcardScreenState extends State<FlashcardScreen> with TickerProviderSt
   }
 
   Widget _buildProgressIndicator() {
-    double progress = (_flashcardService.currentIndex + 1) / _flashcardService.totalCards;
+    double progress = _flashcardService.totalCards > 0 
+        ? (_flashcardService.currentIndex + 1) / _flashcardService.totalCards
+        : 0.0;
     
     return Column(
       children: [
@@ -673,7 +744,7 @@ class _FlashcardScreenState extends State<FlashcardScreen> with TickerProviderSt
               ),
             ),
             Text(
-              _flashcardService.currentCard.category,
+              _flashcardService.currentCard?.category ?? 'Loading...',
               style: const TextStyle(
                 fontSize: 14,
                 color: Colors.black87,
@@ -759,7 +830,7 @@ class _FlashcardScreenState extends State<FlashcardScreen> with TickerProviderSt
         ),
         const SizedBox(height: 20),
         Text(
-          _flashcardService.currentCard.question,
+          _flashcardService.currentCard?.question ?? 'Loading flashcards...',
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w600,
@@ -799,7 +870,7 @@ class _FlashcardScreenState extends State<FlashcardScreen> with TickerProviderSt
         ),
         const SizedBox(height: 20),
         Text(
-          _flashcardService.currentCard.answer,
+          _flashcardService.currentCard?.answer ?? 'Loading...',
           style: const TextStyle(
             fontSize: 16,
             color: Colors.black87,
@@ -831,6 +902,7 @@ class _FlashcardScreenState extends State<FlashcardScreen> with TickerProviderSt
 
   Widget _buildAnswerButton(String text, Color color1, Color color2, VoidCallback onPressed) {
     return Container(
+      constraints: const BoxConstraints(maxWidth: 150), // Add constraints to limit the button width
       decoration: BoxDecoration(
         gradient: LinearGradient(colors: [color2, color1]),
         borderRadius: BorderRadius.circular(8),

@@ -626,6 +626,10 @@ class _GoalsPageState extends State<GoalsPage> with SingleTickerProviderStateMix
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
+                        textStyle: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       child: const Text(
                         'Great!',
@@ -937,7 +941,7 @@ class _GoalsPageState extends State<GoalsPage> with SingleTickerProviderStateMix
           // Break Reminders
           _buildSettingCard(
             icon: Icons.coffee,
-            title: 'Break Reminders (Pomodoro Style)',
+            title: 'Break Reminders (Pomodoro)',
             child: Column(
               children: [
                 Row(
@@ -1784,8 +1788,7 @@ class _GoalsPageState extends State<GoalsPage> with SingleTickerProviderStateMix
     bool isCustomGoalType = false;
     final TextEditingController customGoalTypeController = TextEditingController();
     final TextEditingController customUnitController = TextEditingController();
-    
-    // Predefined examples based on course and goal type
+
     Map<String, Map<GoalType, int>> predefinedExamples = {
       'Math': {
         GoalType.practiceProblems: 25,
@@ -1821,160 +1824,46 @@ class _GoalsPageState extends State<GoalsPage> with SingleTickerProviderStateMix
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Dialog(
             backgroundColor: Colors.transparent,
-            child: Container(
-              margin: const EdgeInsets.all(20),
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
-                    blurRadius: 20,
-                    spreadRadius: 5,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Add Course Goal',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
+            child: SingleChildScrollView(
+              child: Container(
+                margin: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 20,
+                      spreadRadius: 5,
+                      offset: const Offset(0, 10),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  
-                  // Course Selection
-                  const Text(
-                    'Course:', 
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF2A7DE1), Color(0xFF2BD46E)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.cyanAccent.withOpacity(0.2),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Container(
-                      margin: const EdgeInsets.all(1.5),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10.5),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          isExpanded: true,
-                          value: selectedCourse,
-                          dropdownColor: Colors.white,
-                          elevation: 8,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87,
-                          ),
-                          menuMaxHeight: 200,
-                          borderRadius: BorderRadius.circular(12),
-                          items: CoursePriority.values.where((course) => course != CoursePriority.custom).map((course) {
-                            return DropdownMenuItem(
-                              value: course.displayName,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      course.emoji,
-                                      style: const TextStyle(fontSize: 18),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      course.displayName,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.black87,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                          selectedItemBuilder: (context) {
-                            return CoursePriority.values.where((course) => course != CoursePriority.custom).map((course) {
-                              return Align(
-                                alignment: Alignment.centerLeft,
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                                  child: Row(
-                                    children: [
-                                      Text(
-                                        course.emoji,
-                                        style: const TextStyle(fontSize: 18),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        course.displayName,
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.black87,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }).toList();
-                          },
-                          onChanged: (value) {
-                            if (value != null) {
-                              selectedCourse = value;
-                              updateTargetFromExample();
-                              setDialogState(() {});
-                            }
-                          },
-                        ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Add Course Goal',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
                     ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Goal Type Selection
-                  const Text(
-                    'Goal Type:', 
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                      color: Colors.black87,
+                    const SizedBox(height: 20),
+                    
+                    // Course Selection
+                    const Text(
+                      'Course:', 
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                        color: Colors.black87,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  
-                  // Goal Type Dropdown or Custom Input
-                  if (!isCustomGoalType) ...[
+                    const SizedBox(height: 8),
                     Container(
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
@@ -1998,9 +1887,9 @@ class _GoalsPageState extends State<GoalsPage> with SingleTickerProviderStateMix
                           borderRadius: BorderRadius.circular(10.5),
                         ),
                         child: DropdownButtonHideUnderline(
-                          child: DropdownButton<GoalType>(
+                          child: DropdownButton<String>(
                             isExpanded: true,
-                            value: selectedType,
+                            value: selectedCourse,
                             dropdownColor: Colors.white,
                             elevation: 8,
                             style: const TextStyle(
@@ -2010,21 +1899,20 @@ class _GoalsPageState extends State<GoalsPage> with SingleTickerProviderStateMix
                             ),
                             menuMaxHeight: 200,
                             borderRadius: BorderRadius.circular(12),
-                            items: GoalType.values.map((type) {
+                            items: CoursePriority.values.where((course) => course != CoursePriority.custom).map((course) {
                               return DropdownMenuItem(
-                                value: type,
+                                value: course.displayName,
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                   child: Row(
                                     children: [
-                                      Icon(
-                                        type == GoalType.custom ? Icons.edit : _getGoalTypeIcon(type),
-                                        size: 18,
-                                        color: Colors.black87,
+                                      Text(
+                                        course.emoji,
+                                        style: const TextStyle(fontSize: 18),
                                       ),
                                       const SizedBox(width: 8),
                                       Text(
-                                        type.displayName,
+                                        course.displayName,
                                         style: const TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
@@ -2037,21 +1925,20 @@ class _GoalsPageState extends State<GoalsPage> with SingleTickerProviderStateMix
                               );
                             }).toList(),
                             selectedItemBuilder: (context) {
-                              return GoalType.values.map((type) {
+                              return CoursePriority.values.where((course) => course != CoursePriority.custom).map((course) {
                                 return Align(
                                   alignment: Alignment.centerLeft,
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 12),
                                     child: Row(
                                       children: [
-                                        Icon(
-                                          type == GoalType.custom ? Icons.edit : _getGoalTypeIcon(type),
-                                          size: 18,
-                                          color: Colors.black87,
+                                        Text(
+                                          course.emoji,
+                                          style: const TextStyle(fontSize: 18),
                                         ),
                                         const SizedBox(width: 8),
                                         Text(
-                                          type.displayName,
+                                          course.displayName,
                                           style: const TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.w600,
@@ -2067,14 +1954,8 @@ class _GoalsPageState extends State<GoalsPage> with SingleTickerProviderStateMix
                             },
                             onChanged: (value) {
                               if (value != null) {
-                                if (value == GoalType.custom) {
-                                  isCustomGoalType = true;
-                                  customGoalTypeController.text = '';
-                                  customUnitController.text = '';
-                                } else {
-                                  selectedType = value;
-                                  updateTargetFromExample();
-                                }
+                                selectedCourse = value;
+                                updateTargetFromExample();
                                 setDialogState(() {});
                               }
                             },
@@ -2082,8 +1963,189 @@ class _GoalsPageState extends State<GoalsPage> with SingleTickerProviderStateMix
                         ),
                       ),
                     ),
-                  ] else ...[
-                    // Custom Goal Type Input
+
+                    const SizedBox(height: 16),
+
+                    // Goal Type Selection
+                    const Text(
+                      'Goal Type:', 
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    
+                    // Goal Type Dropdown or Custom Input
+                    if (!isCustomGoalType) ...[
+                      Container(
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF2A7DE1), Color(0xFF2BD46E)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.cyanAccent.withOpacity(0.2),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Container(
+                          margin: const EdgeInsets.all(1.5),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10.5),
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<GoalType>(
+                              isExpanded: true,
+                              value: selectedType,
+                              dropdownColor: Colors.white,
+                              elevation: 8,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black87,
+                              ),
+                              menuMaxHeight: 200,
+                              borderRadius: BorderRadius.circular(12),
+                              items: GoalType.values.map((type) {
+                                return DropdownMenuItem(
+                                  value: type,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          type == GoalType.custom ? Icons.edit : _getGoalTypeIcon(type),
+                                          size: 18,
+                                          color: Colors.black87,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          type.displayName,
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                              selectedItemBuilder: (context) {
+                                return GoalType.values.map((type) {
+                                  return Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            type == GoalType.custom ? Icons.edit : _getGoalTypeIcon(type),
+                                            size: 18,
+                                            color: Colors.black87,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            type.displayName,
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.black87,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }).toList();
+                              },
+                              onChanged: (value) {
+                                if (value != null) {
+                                  if (value == GoalType.custom) {
+                                    isCustomGoalType = true;
+                                    customGoalTypeController.text = '';
+                                    customUnitController.text = '';
+                                  } else {
+                                    selectedType = value;
+                                    updateTargetFromExample();
+                                  }
+                                  setDialogState(() {});
+                                }
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                    ] else ...[
+                      // Custom Goal Type Input
+                      Container(
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF2A7DE1), Color(0xFF2BD46E)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.cyanAccent.withOpacity(0.2),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Container(
+                          margin: const EdgeInsets.all(1.5),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10.5),
+                          ),
+                          child: TextFormField(
+                            controller: customGoalTypeController,
+                            decoration: const InputDecoration(
+                              hintText: 'Enter custom goal type (e.g., Essays Written, Books Read)',
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      
+                      TextButton(
+                        onPressed: () {
+                          isCustomGoalType = false;
+                          selectedType = GoalType.practiceProblems;
+                          customGoalTypeController.clear();
+                          customUnitController.clear();
+                          setDialogState(() {});
+                        },
+                        child: const Text('← Back to predefined goal types'),
+                      ),
+                    ],
+
+                    const SizedBox(height: 16),
+
+                    // Target Value
+                    const Text(
+                      'Target:', 
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
                     Container(
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
@@ -2107,190 +2169,133 @@ class _GoalsPageState extends State<GoalsPage> with SingleTickerProviderStateMix
                           borderRadius: BorderRadius.circular(10.5),
                         ),
                         child: TextFormField(
-                          controller: customGoalTypeController,
-                          decoration: const InputDecoration(
-                            hintText: 'Enter custom goal type (e.g., Essays Written, Books Read)',
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          key: ValueKey('${selectedCourse}_${selectedType.displayName}'),
+                          initialValue: targetValue.toString(),
+                          keyboardType: TextInputType.number,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
                           ),
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                            hintText: 'Enter target value...',
+                            hintStyle: TextStyle(
+                              color: Colors.black54,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                          onChanged: (value) {
+                            targetValue = int.tryParse(value) ?? targetValue;
+                          },
                         ),
                       ),
                     ),
-                    const SizedBox(height: 8),
                     
-                    TextButton(
-                      onPressed: () {
-                        isCustomGoalType = false;
-                        selectedType = GoalType.practiceProblems;
-                        customGoalTypeController.clear();
-                        customUnitController.clear();
-                        setDialogState(() {});
-                      },
-                      child: const Text('← Back to predefined goal types'),
+                    const SizedBox(height: 12),
+                    
+                    // Example note
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            const Color(0xFF2A7DE1).withOpacity(0.1),
+                            const Color(0xFF2BD46E).withOpacity(0.1),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: const Color(0xFF2A7DE1).withOpacity(0.3)),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF2A7DE1), Color(0xFF2BD46E)],
+                              ),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Icon(Icons.lightbulb, color: Colors.white, size: 14),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Suggested target: ${predefinedExamples[selectedCourse]?[selectedType] ?? 20} ${selectedType.unit}',
+                              style: const TextStyle(
+                                color: Colors.black87,
+                                fontSize: 12,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Buttons
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('Cancel', style: TextStyle(color: Colors.black54)),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF2A7DE1), Color(0xFF2BD46E)],
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.cyanAccent.withOpacity(0.3),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                final newGoal = Goal(
+                                  type: isCustomGoalType ? GoalType.custom : selectedType,
+                                  target: targetValue,
+                                  course: selectedCourse,
+                                  customGoalTypeName: isCustomGoalType ? customGoalTypeController.text.trim() : null,
+                                  customUnit: isCustomGoalType ? 'per day' : null,
+                                );
+                                _goalsService.addCourseGoal(newGoal);
+                                setState(() {});
+                                Navigator.of(context).pop();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: const Text(
+                                'Add Goal',
+                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
-
-                  const SizedBox(height: 16),
-
-                  // Target Value
-                  const Text(
-                    'Target:', 
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF2A7DE1), Color(0xFF2BD46E)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.cyanAccent.withOpacity(0.2),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Container(
-                      margin: const EdgeInsets.all(1.5),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10.5),
-                      ),
-                      child: TextFormField(
-                        key: ValueKey('${selectedCourse}_${selectedType.displayName}'),
-                        initialValue: targetValue.toString(),
-                        keyboardType: TextInputType.number,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                        ),
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                          hintText: 'Enter target value...',
-                          hintStyle: TextStyle(
-                            color: Colors.black54,
-                            fontWeight: FontWeight.normal,
-                          ),
-                        ),
-                        onChanged: (value) {
-                          targetValue = int.tryParse(value) ?? targetValue;
-                        },
-                      ),
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 12),
-                  
-                  // Example note
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          const Color(0xFF2A7DE1).withOpacity(0.1),
-                          const Color(0xFF2BD46E).withOpacity(0.1),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: const Color(0xFF2A7DE1).withOpacity(0.3)),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF2A7DE1), Color(0xFF2BD46E)],
-                            ),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Icon(Icons.lightbulb, color: Colors.white, size: 14),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Suggested target: ${predefinedExamples[selectedCourse]?[selectedType] ?? 20} ${selectedType.unit}',
-                            style: const TextStyle(
-                              color: Colors.black87,
-                              fontSize: 12,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: const Text('Cancel', style: TextStyle(color: Colors.black54)),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF2A7DE1), Color(0xFF2BD46E)],
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.cyanAccent.withOpacity(0.3),
-                                blurRadius: 6,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: ElevatedButton(
-                            onPressed: () {
-                              final newGoal = Goal(
-                                type: isCustomGoalType ? GoalType.custom : selectedType,
-                                target: targetValue,
-                                course: selectedCourse,
-                                customGoalTypeName: isCustomGoalType ? customGoalTypeController.text.trim() : null,
-                                customUnit: isCustomGoalType ? 'per day' : null,
-                              );
-                              _goalsService.addCourseGoal(newGoal);
-                              setState(() {});
-                              Navigator.of(context).pop();
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              shadowColor: Colors.transparent,
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: const Text(
-                              'Add Goal',
-                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                ),
               ),
             ),
           ),

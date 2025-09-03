@@ -40,7 +40,6 @@ dependencies:
   open_filex: ^4.4.0
   audioplayers: ^6.5.0
   flutter_svg: ^2.0.7
-  flutter_lints: ^6.0.0
   firebase_core: ^4.0.0
   firebase_auth: ^6.0.1
   google_sign_in: ^7.1.1
@@ -52,6 +51,7 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  http: ^1.5.0
 
 dev_dependencies:
   flutter_test:
@@ -62,7 +62,6 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^6.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -76,11 +75,11 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/google_icon.png
     - assets/images/onboarding.png
     - assets/images/Eduro_Logo.svg
     - assets/images/eduro_logo2.svg
     - assets/images/edurologo3.png
+    - assets/images/google_icon.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:
