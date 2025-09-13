@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "709658004856",
+    "firebase_url": "https://eduro-78243-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "eduro-78243",
+    "storage_bucket": "eduro-78243.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:709658004856:android:ae85405a11ca4dc4f54c8d",
+        "android_client_info": {
+          "package_name": "com.example.eduro"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "709658004856-7stmsc6oh7rm8omrcsc2b4rlehitq8fn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.eduro",
+            "certificate_hash": "f862b5ad74abdb34f362c5f01e90f10cba55a527"
+          }
+        },
+        {
+          "client_id": "709658004856-0afe235j1no82qnh284o5h10uenv7inh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBsk1jC53ZzVz-0j28hVd5rbJw2VHcYJWE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "709658004856-0afe235j1no82qnh284o5h10uenv7inh.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "709658004856-juq124plb9q5rt9ro4jk3sjfojc1o0bl.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.eduro"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
