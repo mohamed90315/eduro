@@ -1,5 +1,10 @@
 //------------------------ I m p o r t s --------------------------------
 import 'package:flutter/material.dart';
+import 'create_note_page.dart';
+import 'note_detail_page.dart';
+import 'create_drawing_note_page.dart';
+import 'create_file_note_page.dart';
+import 'create_voice_note_page.dart';
 
 //------------------------ N o t e s   P a g e --------------------------------
 class NotesPage extends StatefulWidget {
@@ -11,62 +16,101 @@ class NotesPage extends StatefulWidget {
 
 //------------------------ S t a t e --------------------------------
 class _NotesPageState extends State<NotesPage> {
-  //------------------------ M o c k   N o t e s --------------------------------
-  final List<Map<String, String>> mockNotes = [
+  //------------------------ N o t e s   L i s t --------------------------------
+  List<Map<String, String>> notes = [
     {
+      "title": "Integration Techniques",
       "subject": "Mathematics",
       "note": "Integration techniques and practice problems.",
+      "color": Colors.blue.value.toString(),
+      "date": DateTime.now().subtract(const Duration(days: 2)).toString(),
+      "type": "text",
     },
     {
+      "title": "Reinforcement Learning",
       "subject": "Artificial Intelligence",
       "note": "Review reinforcement learning algorithms.",
+      "color": Colors.green.value.toString(),
+      "date": DateTime.now().subtract(const Duration(days: 1)).toString(),
+      "type": "text",
     },
     {
+      "title": "Sensor Calibration",
       "subject": "Robotics",
       "note": "Check sensors calibration for navigation project.",
+      "color": Colors.orange.value.toString(),
+      "date": DateTime.now().subtract(const Duration(hours: 12)).toString(),
+      "type": "text",
     },
     {
+      "title": "Object Detection Paper",
       "subject": "Computer Vision",
       "note": "Finish reading paper on object detection.",
+      "color": Colors.purple.value.toString(),
+      "date": DateTime.now().subtract(const Duration(hours: 6)).toString(),
+      "type": "text",
     },
     {
+      "title": "Flutter Animations",
       "subject": "Flutter",
       "note": "Experiment with animations and state management.",
+      "color": Colors.blue.value.toString(),
+      "date": DateTime.now().subtract(const Duration(hours: 3)).toString(),
+      "type": "text",
     },
     {
+      "title": "Dataset Analysis",
       "subject": "Data Science",
       "note": "Clean dataset and run exploratory analysis.",
-    },
-    {"subject": "Cyber Security", "note": "Review basics of network security."},
-    {
-      "subject": "Operating Systems",
-      "note": "Study process scheduling algorithms.",
-    },
-    {
-      "subject": "Machine Learning",
-      "note": "Practice decision trees and SVMs.",
-    },
-    {
-      "subject": "Deep Learning",
-      "note": "Understand CNN and RNN architectures.",
-    },
-    {
-      "subject": "Cloud Computing",
-      "note": "Check AWS basics and deployment steps.",
-    },
-    {
-      "subject": "Software Engineering",
-      "note": "Revise software development lifecycle models.",
-    },
-    {
-      "subject": "Database Systems",
-      "note": "Review normalization and indexing.",
-    },
-    {
-      "subject": "Linear Algebra",
-      "note": "Matrix operations and eigenvalues practice.",
+      "color": Colors.teal.value.toString(),
+      "date": DateTime.now().subtract(const Duration(hours: 1)).toString(),
+      "type": "text",
     },
   ];
+
+  //------------------------ G e t   N o t e   I c o n --------------------------------
+  IconData _getNoteIcon(String type) {
+    switch (type) {
+      case "drawing":
+        return Icons.brush;
+      case "file":
+        return Icons.attach_file;
+      case "voice":
+        return Icons.mic;
+      case "text":
+      default:
+        return Icons.note;
+    }
+  }
+
+  //------------------------ A d d   N o t e   M e t h o d --------------------------------
+  void _addNote(Map<String, String> newNote) {
+    setState(() {
+      notes.insert(0, newNote); // Add to beginning of list
+    });
+  }
+
+  //------------------------ F o r m a t   D a t e --------------------------------
+  String _formatDate(String dateString) {
+    try {
+      final date = DateTime.parse(dateString);
+      final now = DateTime.now();
+      final difference = now.difference(date);
+
+      if (difference.inDays == 0) {
+        if (difference.inHours == 0) {
+          return '${difference.inMinutes} min ago';
+        }
+        return '${difference.inHours}h ago';
+      } else if (difference.inDays == 1) {
+        return 'Yesterday';
+      } else {
+        return '${difference.inDays} days ago';
+      }
+    } catch (e) {
+      return 'Recently';
+    }
+  }
 
   //------------------------ F A B   M e n u --------------------------------
   void _showAddNoteOptions() {
@@ -109,7 +153,13 @@ class _NotesPageState extends State<NotesPage> {
                 gradient: [Colors.blue, Colors.cyan],
                 onTap: () {
                   Navigator.pop(context);
-                  // TODO: Add navigation to "create note" page
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          CreateNotePage(onNoteCreated: _addNote),
+                    ),
+                  );
                 },
               ),
               _buildAddNoteOption(
@@ -119,7 +169,13 @@ class _NotesPageState extends State<NotesPage> {
                 gradient: [Colors.purple, Colors.pink],
                 onTap: () {
                   Navigator.pop(context);
-                  // TODO: Open drawing pad or text editor
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          CreateDrawingNotePage(onNoteCreated: _addNote),
+                    ),
+                  );
                 },
               ),
               _buildAddNoteOption(
@@ -129,7 +185,13 @@ class _NotesPageState extends State<NotesPage> {
                 gradient: [Colors.green, Colors.teal],
                 onTap: () {
                   Navigator.pop(context);
-                  // TODO: Use file picker/image picker here
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          CreateFileNotePage(onNoteCreated: _addNote),
+                    ),
+                  );
                 },
               ),
               _buildAddNoteOption(
@@ -139,7 +201,13 @@ class _NotesPageState extends State<NotesPage> {
                 gradient: [Colors.orange, Colors.red],
                 onTap: () {
                   Navigator.pop(context);
-                  // TODO: Implement voice recording feature
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          CreateVoiceNotePage(onNoteCreated: _addNote),
+                    ),
+                  );
                 },
               ),
               const SizedBox(height: 20),
@@ -289,7 +357,7 @@ class _NotesPageState extends State<NotesPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${mockNotes.length} Notes',
+                        '${notes.length} Notes',
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -314,14 +382,24 @@ class _NotesPageState extends State<NotesPage> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: ListView.builder(
-                itemCount: mockNotes.length,
+                itemCount: notes.length,
                 itemBuilder: (context, index) {
-                  final note = mockNotes[index];
+                  final note = notes[index];
+                  // Parse color from string (fallback to blue if not available)
+                  Color noteColor = Colors.blue;
+                  try {
+                    if (note["color"] != null) {
+                      noteColor = Color(int.parse(note["color"]!));
+                    }
+                  } catch (e) {
+                    noteColor = Colors.blue;
+                  }
+
                   return Container(
                     margin: const EdgeInsets.only(bottom: 12),
                     child: Card(
                       elevation: 4,
-                      shadowColor: Colors.cyanAccent.withOpacity(0.3),
+                      shadowColor: noteColor.withOpacity(0.3),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -329,10 +407,7 @@ class _NotesPageState extends State<NotesPage> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
                           gradient: LinearGradient(
-                            colors: [
-                              Colors.white,
-                              Colors.cyan.withOpacity(0.05),
-                            ],
+                            colors: [Colors.white, noteColor.withOpacity(0.05)],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
@@ -342,50 +417,74 @@ class _NotesPageState extends State<NotesPage> {
                           leading: Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.cyan.withOpacity(0.2),
-                                  Colors.blue.withOpacity(0.2),
-                                ],
-                              ),
+                              color: noteColor.withOpacity(0.2),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Icon(
-                              Icons.note,
-                              color: Colors.cyan,
+                            child: Icon(
+                              _getNoteIcon(note["type"] ?? "text"),
+                              color: noteColor,
                               size: 24,
                             ),
                           ),
-                          title: Text(
-                            note["subject"]!,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          subtitle: Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: Text(
-                              note["note"]!,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Colors.black54,
+                          title: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                note["title"] ?? note["subject"]!,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
                               ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                              if (note["title"] != null) ...[
+                                const SizedBox(height: 4),
+                                Text(
+                                  note["subject"]!,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: noteColor,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 8),
+                              Text(
+                                note["note"]!,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.black54,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              if (note["date"] != null) ...[
+                                const SizedBox(height: 8),
+                                Text(
+                                  _formatDate(note["date"]!),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[500],
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                           trailing: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: Colors.cyan.withOpacity(0.1),
+                              color: noteColor.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.arrow_forward_ios,
                               size: 16,
-                              color: Colors.cyan,
+                              color: noteColor,
                             ),
                           ),
                           onTap: () {
@@ -394,7 +493,7 @@ class _NotesPageState extends State<NotesPage> {
                               MaterialPageRoute(
                                 builder: (context) => NoteDetailPage(
                                   subject: note["subject"]!,
-                                  note: note["note"]!,
+                                  note: note,
                                 ),
                               ),
                             );
@@ -437,124 +536,4 @@ class _NotesPageState extends State<NotesPage> {
 }
 
 //------------------------ D e t a i l   P a g e --------------------------------
-class NoteDetailPage extends StatelessWidget {
-  final String subject;
-  final String note;
-
-  const NoteDetailPage({Key? key, required this.subject, required this.note})
-    : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
-      //------------------------ A p p B a r --------------------------------
-      appBar: AppBar(
-        title: Text(
-          subject,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
-        elevation: 0,
-        backgroundColor: Colors.grey[50],
-        foregroundColor: Colors.black,
-      ),
-
-      //------------------------ N o t e   D e t a i l   C a r d --------------------------------
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            // Header card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF2A7DE1), Color(0xFF2BD46E)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.cyanAccent.withOpacity(0.3),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.note_alt,
-                      color: Colors.white,
-                      size: 28,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          subject,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        const Text(
-                          'Note Details',
-                          style: TextStyle(fontSize: 14, color: Colors.white70),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // Content card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Text(
-                note,
-                style: const TextStyle(
-                  fontSize: 18,
-                  color: Colors.black87,
-                  height: 1.6,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+// Legacy inline NoteDetailPage removed. Using the dedicated NoteDetailPage in note_detail_page.dart.
